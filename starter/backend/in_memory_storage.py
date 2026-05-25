@@ -14,6 +14,9 @@ class InMemoryStorage:
     def get_order(self, order_id: str) -> dict[str, str | int] | None:
         return self._orders.get(order_id, {}).copy() if self._orders.get(order_id) else None
 
+    def delete_order(self, order_id: str) -> dict[str, str | int] :
+        return self._orders.pop(order_id)
+
     def get_all_orders(self) -> dict[str, dict[str, str | int]]:
         return {k: v.copy() for k, v in self._orders.items()}
 

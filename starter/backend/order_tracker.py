@@ -1,11 +1,17 @@
 # This module contains the OrderTracker class, which encapsulates the core
 # business logic for managing orders.
 
+
+_VALID_STATUSES = [
+    "pending", "processing", "shipped"
+]
+
 class OrderTracker:
     """
     Manages customer orders, providing functionalities to add, update,
     and retrieve order information.
     """
+    
     def __init__(self, storage):
         required_methods = ['save_order', 'get_order', 'get_all_orders']
         for method in required_methods:
@@ -21,6 +27,12 @@ class OrderTracker:
             customer_id: str,
             status: str = "pending"
         ) -> dict[str, str | int]:
+        if not status or status not in _VALID_STATUSES:
+            raise ValueError(f"Order with invalid status '{status}'.")
+
+        if not isinstance(quantity, int) or quantity <= 0:
+            raise ValueError(f"Order with invalid quantity '{quantity}'.")
+
         if self.storage.get_order(order_id):
             raise ValueError(f"Order with ID '{order_id}' already exists.")
 
@@ -34,14 +46,14 @@ class OrderTracker:
         self.storage.save_order(order_id=order_id, order_data=order)
 
     def get_order_by_id(self, order_id: str) -> dict[str, str | int]:
-        return self.storage.get_order(order_id=order_id)
+        if not (existing := self.storage.get_order(order_id=order_id)):
+            raise KeyError(f"Order '{order_id}' not found")        
+        return existing
 
     def update_order_status(self, order_id: str, new_status: str) -> dict[str, str | int]:
-        if not new_status or new_status not in ["pending", "processing", "shipped"]:
-            raise ValueError(f"Invalid status update (Value: '{new_status}')")
+        if not new_status or new_status not in _VALID_STATUSES:
+            raise ValueError(f"Order update with invalid status '{new_status}'")
         existing = self.get_order_by_id(order_id=order_id)
-        if not existing:
-            raise KeyError(f"Order '{order_id}' not found")        
         return self.storage.save_order(
             order_id=order_id,
             order_data={
@@ -55,9 +67,12 @@ class OrderTracker:
 
     def list_orders_by_status(self, status: str) -> dict[str, dict[str, str | int]]:
         if not status:
-            raise ValueError(f"status is invalid. value: {status}")
+            raise ValueError(f"Order list with invalid status '{status}'")
         orders = self.storage.get_all_orders()
         return {
             key: order
             for key, order in orders.items() if order.get("status") == status.lower()
         }
+
+    def delete_order(self, order_id: str) -> dict[str, str | int]:
+        return self.storage.delete_order(order_id=order_id)

@@ -52,6 +52,47 @@ def test_add_order_raises_error_if_exists(
             "ORD_EXISTING", "New Item", 1, "CUST001"
         )
 
+@pytest.mark.parametrize(
+    "status", [
+        (None),
+        (""),
+        ("unknown"),
+    ]
+)
+def test_add_order_raises_error_if_invalid_status(
+    status: str, order_tracker: OrderTracker
+):
+    """Tests that adding an order with a duplicate ID raises a ValueError"""
+    # Simulate that the storage finds an existing order
+    with pytest.raises(
+        ValueError, match=f"Order with invalid status '{status}'."
+    ):
+        order_tracker.add_order(
+            "ORD_EXISTING", "New Item", 1, "CUST001", status
+        )
+
+@pytest.mark.parametrize(
+    "quantity", [
+        (1.0),
+        (0),
+        (-1),
+        (None),
+        (""),
+        ("1"),
+    ]
+)
+def test_add_order_raises_error_if_invalid_quantity(
+    quantity: float | int | str | None, order_tracker: OrderTracker
+):
+    """Tests that adding an order with a duplicate ID raises a ValueError"""
+    # Simulate that the storage finds an existing order
+    with pytest.raises(
+        ValueError, match=f"Order with invalid quantity '{quantity}'."
+    ):
+        order_tracker.add_order(
+            "ORD_EXISTING", "New Item", quantity, "CUST001"
+        )
+
 def test_get_order_by_id_successfully(
     order_tracker: OrderTracker, mock_storage: Mock
 ):
@@ -71,18 +112,16 @@ def test_get_order_by_id_successfully(
     mock_storage.get_order.assert_called_once_with(order_id=order_id)
     assert actual == expected
 
-def test_get_order_by_id_returns_none_error_if_not_exists(
+def test_get_order_by_id_raises_error_if_not_exists(
     order_tracker: OrderTracker, mock_storage: Mock
 ):
     """Tests getting a non existing order using an order_id."""
     order_id = "ORD001"
-    expected = None
-    
-    actual = order_tracker.get_order_by_id(order_id)
+    with pytest.raises(KeyError, match=f"Order '{order_id}' not found"):
+        _ = order_tracker.get_order_by_id(order_id)
 
     # We expect get_order to be called once
     mock_storage.get_order.assert_called_once_with(order_id=order_id)
-    assert actual == expected
 
 @pytest.mark.parametrize(
     "old_status, new_status",
@@ -139,7 +178,7 @@ def test_update_order_status_with_invalid_status_failure(
     }
     
     with pytest.raises(
-        ValueError, match=re.escape(f"Invalid status update (Value: '{new_status}')")
+        ValueError, match=f"Order update with invalid status '{new_status}'"
     ):
         _ = order_tracker.update_order_status(order_id, new_status)
 
@@ -147,7 +186,7 @@ def test_update_order_status_with_invalid_status_failure(
     mock_storage.get_order.assert_not_called()
     mock_storage.save_order.assert_not_called()
 
-def test_update_order_status__raises_error_if_not_exists(
+def test_update_order_status_raises_error_if_not_exists(
     order_tracker: OrderTracker, mock_storage: Mock
 ):
     """Tests getting an existing order using an order_id."""
@@ -403,9 +442,43 @@ def test_list_orders_by_status_bad_status_failure(
 
     with pytest.raises(
         ValueError,
-        match=f"status is invalid. value: {status}"
+        match=f"Order list with invalid status '{status}'"
     ):
         order_tracker.list_orders_by_status(status=status)
 
     # We expect get_all_orders to be called not called
     mock_storage.get_all_orders.assert_not_called()
+
+def test_delete_order_successfully(
+    order_tracker: OrderTracker, mock_storage: Mock
+):
+    """Tests deleting an order with order_id."""
+    order_id = "ORD001"
+    item = {
+        "order_id": order_id,
+        "item_name": "Laptop",
+        "quantity": 1,
+        "customer_id": "CUST001",
+        "status": "pending"
+    }
+    expected = item
+    mock_storage.delete_order.return_value = item
+    
+    actual = order_tracker.delete_order(order_id)
+
+    # We expect delete_order to be called once
+    mock_storage.delete_order.assert_called_once_with(order_id=order_id)
+    assert actual == expected
+
+def test_delete_order_with_invalid_order_failure(
+    order_tracker: OrderTracker, mock_storage: Mock
+):
+    """Tests deleting an order with order_id."""
+    order_id = "ORD001"
+    mock_storage.delete_order.side_effect = ValueError(f"Order '{order_id}' not found")
+    
+    with pytest.raises(ValueError, match=f"Order '{order_id}' not found"):
+        _ = order_tracker.delete_order(order_id)
+
+    # We expect delete_order to be called once
+    mock_storage.delete_order.assert_called_once_with(order_id=order_id)
