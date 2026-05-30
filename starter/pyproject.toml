@@ -6,17 +6,17 @@ readme = "README.md"
 requires-python = ">=3.11.9"
 dependencies = [
     "flask==3.1.2",
-    "ruff>=0.15.15",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
+    "ruff>=0.15.15",    
 ]
 
 [tool.ruff]
 # Target your specific Python version
-target-version = "py310"
+target-version = "py311"
 
 # PEP 8 standard line length is 79,
 # but that is an old standard that makes little sense.
