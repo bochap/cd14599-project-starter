@@ -5,10 +5,24 @@ description = "Udatracker is an order management system"
 readme = "README.md"
 requires-python = ">=3.11.9"
 dependencies = [
-    "flask==3.1.2"
+    "flask==3.1.2",
+    "ruff>=0.15.15",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
 ]
+
+[tool.ruff]
+# Target your specific Python version
+target-version = "py310"
+
+# PEP 8 standard line length is 79,
+# but that is an old standard that makes little sense.
+# Using 120 which is experienced frequently at big organizations
+line-length = 120
+
+[tool.ruff.lint]
+# Enable pycodestyle (E, W), Pyflakes (F), isort (I), and pep8-naming (N)
+select = ["E", "W", "F", "I", "N"]

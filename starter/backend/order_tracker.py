@@ -11,7 +11,7 @@ class OrderTracker:
     Manages customer orders, providing functionalities to add, update,
     and retrieve order information.
     """
-    
+
     def __init__(self, storage):
         required_methods = ['save_order', 'get_order', 'get_all_orders']
         for method in required_methods:
@@ -47,7 +47,7 @@ class OrderTracker:
 
     def get_order_by_id(self, order_id: str) -> dict[str, str | int]:
         if not (existing := self.storage.get_order(order_id=order_id)):
-            raise KeyError(f"Order '{order_id}' not found")        
+            raise KeyError(f"Order '{order_id}' not found")
         return existing
 
     def update_order_status(self, order_id: str, new_status: str) -> dict[str, str | int]:

@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify, send_from_directory
-from backend.order_tracker import OrderTracker
+from flask import Flask, jsonify, request, send_from_directory
+
 from backend.in_memory_storage import InMemoryStorage
+from backend.order_tracker import OrderTracker
 
 app = Flask(__name__, static_folder='../frontend')
 in_memory_storage = InMemoryStorage()
