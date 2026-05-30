@@ -62,17 +62,19 @@ class OrderTracker:
             }
         )
 
-    def list_all_orders(self) -> dict[str, dict[str, str | int]]:
-        return self.storage.get_all_orders()
+    def list_all_orders(self) -> list[str, dict[str, str | int]]:
+        orders = self.storage.get_all_orders()
+        return [
+            order for _, order in orders.items()
+        ]
 
-    def list_orders_by_status(self, status: str) -> dict[str, dict[str, str | int]]:
+    def list_orders_by_status(self, status: str) -> list[str, dict[str, str | int]]:
         if not status:
             raise ValueError(f"Order list with invalid status '{status}'")
         orders = self.storage.get_all_orders()
-        return {
-            key: order
-            for key, order in orders.items() if order.get("status") == status.lower()
-        }
+        return [
+            order for _, order in orders.items() if order.get("status") == status.lower()
+        ]
 
     def delete_order(self, order_id: str) -> dict[str, str | int]:
         return self.storage.delete_order(order_id=order_id)

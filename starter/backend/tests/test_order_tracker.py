@@ -237,14 +237,14 @@ def test_list_all_orders_with_orders_successfully(
     orders: dict[str, dict[str, str | int]], order_tracker: OrderTracker, mock_storage: Mock
 ):
     """Tests getting all orders."""
-    expected = orders
+    expected = [ order for _, order in orders.items()]
     mock_storage.get_all_orders.return_value = orders
 
     actual = order_tracker.list_all_orders()
 
     # We expect get_all_orders to be called once
     mock_storage.get_all_orders.assert_called_once()
-    assert actual == expected
+    assert sorted(actual, key=lambda o: o["order_id"]) == sorted(expected, key=lambda o: o["order_id"])
 
 @pytest.mark.parametrize(
     "orders", [
@@ -272,14 +272,14 @@ def test_list_orders_by_status_all_found_successfully(
     mock_storage: Mock
 ):
     """Tests getting orders by status all found."""
-    expected = orders
+    expected = [ order for _, order in orders.items()]
     mock_storage.get_all_orders.return_value = orders
 
     actual = order_tracker.list_orders_by_status(status="pending")
 
     # We expect get_all_orders to be called once
     mock_storage.get_all_orders.assert_called_once()
-    assert actual == expected
+    assert sorted(actual, key=lambda o: o["order_id"]) == sorted(expected, key=lambda o: o["order_id"])
 
 @pytest.mark.parametrize(
     "orders, expected", [
@@ -305,22 +305,22 @@ def test_list_orders_by_status_all_found_successfully(
                 "customer_id": "CUST0012",
                 "status": "shipped"
             },
-        }, {
-            "ORD002": {
+        }, [
+            {
                 "order_id": "ORD002",
                 "item_name": "Mobile Phone",
                 "quantity": 1,
                 "customer_id": "CUST002",
                 "status": "shipped"
             },
-            "ORD003": {
+            {
                 "order_id": "ORD003",
                 "item_name": "Laptop",
                 "quantity": 15,
                 "customer_id": "CUST0012",
                 "status": "shipped"
-            },
-        })
+            }
+        ])
     ]
 )
 def test_list_orders_by_status_partial_found_successfully(
@@ -336,7 +336,7 @@ def test_list_orders_by_status_partial_found_successfully(
 
     # We expect get_all_orders to be called once
     mock_storage.get_all_orders.assert_called_once()
-    assert actual == expected
+    assert sorted(actual, key=lambda o: o["order_id"]) == sorted(expected, key=lambda o: o["order_id"])
 
 @pytest.mark.parametrize(
     "orders", [
@@ -364,14 +364,14 @@ def test_list_orders_by_status_not_found_successfully(
     mock_storage: Mock
 ):
     """Tests getting orders by status not found."""
-    expected = {}
+    expected = []
     mock_storage.get_all_orders.return_value = orders
 
     actual = order_tracker.list_orders_by_status(status="shipping")
 
     # We expect get_all_orders to be called once
     mock_storage.get_all_orders.assert_called_once()
-    assert actual == expected
+    assert sorted(actual, key=lambda o: o["order_id"]) == sorted(expected, key=lambda o: o["order_id"])
 
 @pytest.mark.parametrize(
     "status", [
@@ -402,14 +402,14 @@ def test_list_orders_by_status_all_found_status_casing_successfully(
             "status": "pending"
         }
     }
-    expected = orders
+    expected = [order for _, order in orders.items()]
     mock_storage.get_all_orders.return_value = orders
 
     actual = order_tracker.list_orders_by_status(status=status)
 
     # We expect get_all_orders to be called once
     mock_storage.get_all_orders.assert_called_once()
-    assert actual == expected
+    assert sorted(actual, key=lambda o: o["order_id"]) == sorted(expected, key=lambda o: o["order_id"])
 
 @pytest.mark.parametrize("status", [
     (None),

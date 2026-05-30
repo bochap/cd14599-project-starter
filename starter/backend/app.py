@@ -51,9 +51,7 @@ def list_orders_api():
         orders = order_tracker.list_orders_by_status(status=request.args.get('status'))
     else:
         orders = order_tracker.list_all_orders()
-    return jsonify([
-        order for _, order in orders.items()
-    ])
+    return jsonify(orders)
 
 @app.route('/api/orders/<string:order_id>', methods=['DELETE'])
 def delete_order_api(order_id):
