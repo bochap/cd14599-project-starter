@@ -10,6 +10,9 @@ class InMemoryStorage:
 
     def save_order(self, order_id: str, order_data: dict) -> dict[str, str | int]:
         self._orders[order_id] = order_data.copy()
+        # Making a change to the save method which is a common pattern for
+        # storage repository to returned the entity that is saved
+        return self._orders[order_id]
 
     def get_order(self, order_id: str) -> dict[str, str | int] | None:
         return self._orders.get(order_id, {}).copy() if self._orders.get(order_id) else None
