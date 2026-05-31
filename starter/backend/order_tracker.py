@@ -43,7 +43,8 @@ class OrderTracker:
             "customer_id": customer_id,
             "status": status
         }
-        self.storage.save_order(order_id=order_id, order_data=order)
+
+        return self.storage.save_order(order_id=order_id, order_data=order)
 
     def get_order_by_id(self, order_id: str) -> dict[str, str | int]:
         if not (existing := self.storage.get_order(order_id=order_id)):
